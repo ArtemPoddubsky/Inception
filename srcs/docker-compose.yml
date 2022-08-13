@@ -1,0 +1,151 @@
+version: "3.7"
+
+networks:
+    inception:
+        name: inception
+        driver: bridge
+
+
+volumes:
+    wordpress:
+        name: wordpress
+        driver: local
+        driver_opts:
+            device: /home/lholdo/data/wordpress
+            o: bind
+            type: none
+  
+    mariadb:
+        name: mariadb
+        driver: local
+        driver_opts:
+            device: /home/lholdo/data/mariadb
+            o: bind
+            type: none
+
+    site:
+        name: site
+        driver: local 
+        driver_opts:
+            device: /home/lholdo/data/site
+            o: bind
+            type: none
+
+services:
+    mariadb:
+        build: ./requirements/mariadb/
+        image: mariadb
+        container_name: mariadb
+        networks:
+          - inception
+        volumes:
+          - mariadb:/var/lib/mysql
+        environment:
+            DB_HOST: ${DB_HOST}
+            DB_NAME: ${DB_NAME}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+            WP_ADMIN_PASS: ${WP_ADMIN_PASS}
+        restart: always
+
+    wordpress:
+        depends_on:
+          - mariadb
+        build: ./requirements/wordpress/
+        image: wordpress
+        container_name: wordpress
+        networks:
+          - inception
+        volumes:
+          - wordpress:/var/www/wordpress
+        environment:
+            DB_HOST: ${DB_HOST}
+            DB_NAME: ${DB_NAME}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+            WP_ADMIN: ${WP_ADMIN}
+            WP_ADMIN_PASS: ${WP_ADMIN_PASS}
+            WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+            WP_SECOND_USER_PASS: ${WP_SECOND_USER_PASS}
+        restart: always
+
+    ftp:
+        depends_on:
+          - wordpress
+        build: ./requirements/bonus/ftp/
+        image: ftp
+        container_name: ftp
+        networks:
+         - inception
+        ports:
+            - "21:21"
+            - "20:20"
+            - "21000-21000:21000-21000"
+        volumes:
+         - wordpress:/var/www/wordpress
+    
+    adminer:
+        depends_on:
+          - wordpress
+        build: ./requirements/bonus/adminer/
+        image: adminer
+        container_name: adminer
+        networks:
+          - inception
+        volumes:
+          - wordpress:/var/www/wordpress
+    
+    site:
+        container_name: site
+        build: ./requirements/bonus/site
+        image: site
+        networks:
+            - inception
+        volumes: 
+            - site:/var/www/html
+        restart: always
+    
+    cadvisor:
+        container_name: cadvisor
+        build: ./requirements/bonus/cadvisor
+        image: cadvisor
+        ports:
+          - "3000:3000"
+        networks:
+            - inception
+        volumes:
+          - /:/rootfs:ro
+          - /var/run:/var/run:rw
+          - /sys:/sys:ro
+          - /var/lib/docker/:/var/lib/docker:ro
+          - /dev/disk/:/dev/disk:ro
+        restart: always
+
+    redis:
+        sysctls:
+          net.core.somaxconn: '511'
+        build: ./requirements/bonus/redis/
+        image: redis
+        container_name: redis
+        networks:
+          - inception
+        volumes:
+          - wordpress:/var/www/wordpress
+        restart: always
+
+    nginx:
+        depends_on:
+          - adminer
+          - ftp
+          - site
+          - redis
+        build: ./requirements/nginx/
+        image: nginx
+        container_name: nginx
+        networks:
+          - inception
+        volumes:
+          - wordpress:/var/www/wordpress
+        ports:
+          - "443:443"
+        restart: always

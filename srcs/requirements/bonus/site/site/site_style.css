@@ -1,0 +1,60 @@
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+a {
+	width: 100vw;
+	height: 19.2vh;
+	display: inline-table;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto;
+}
+
+.Adminer {
+	background-image: url("./images/Adminer.png");
+	background-color: white;
+	background-size: 400px;
+}
+.Adminer:hover {
+	background-size: 450px;
+}
+
+.FTP {
+	background-image: url("./images/FileZilla.png");
+	background-color:rgb(180, 0, 0);
+	background-size: 550px;
+}
+.FTP:hover {
+	background-size: 600px;
+}
+
+.Cadvisor {
+	background-image: url("./images/cadvisor_owl.png");
+	background-color: white;
+	background-size: 200px;
+}
+.Cadvisor:hover {
+	background-image: url("./images/owl_hover.jpg");
+}
+
+.Redis {
+	background-image: url("./images/Redis.png");
+	background-color: rgb(48, 48, 48);
+	background-size: 400px;
+}
+.Redis:hover {
+	background-size: 430px;
+}
+
+.Wordpress {
+	background-image: url("./images/Wordpress.png");
+	background-color: white;
+}
+.Wordpress:hover {
+	background-image: url("./images/Wordpress2.png");
+	background-size: 195px;
+	background-color: white;
+}

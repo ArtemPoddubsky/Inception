@@ -1,0 +1,11 @@
+server {
+	listen 4000;
+	root /var/www/site;
+	index index.html index.htm;
+	location ~* \.(jpg|png|css)$ {
+        try_files $uri $uri/ =404;
+    }
+	location / {
+		try_files $uri $uri/ /index.html =404;
+	}
+}
